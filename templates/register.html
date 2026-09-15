@@ -1,21 +1,72 @@
 {% extends "base.html" %}
-{% block title %}ثبت نام | ABKAM{% endblock %}
+
+{% block title %}ثبت‌نام{% endblock %}
 
 {% block content %}
+
 <div class="auth-card">
-<h1>ساخت حساب</h1>
 
-<form method="post">
-<input name="name" placeholder="نام شما" required>
-<input name="username" placeholder="آیدی انگلیسی، مثل alireza" required>
+    <h1>ثبت‌نام در ABKAM</h1>
 
-<p class="hint">
-هر آیدی فقط یک بار قابل استفاده است.
-</p>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-<button>ثبت نام</button>
-</form>
+    <form method="post">
 
-<a class="secondary" href="/login">قبلاً حساب دارم</a>
+        <input
+            type="text"
+            name="name"
+            placeholder="نام نمایشی"
+            autocomplete="name"
+            required
+        >
+
+        <input
+            type="text"
+            name="username"
+            placeholder="آیدی (مثلاً ABKAM_123)"
+            autocomplete="username"
+            minlength="3"
+            maxlength="32"
+            required
+        >
+
+        <input
+            type="password"
+            name="password"
+            placeholder="رمز عبور"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        >
+
+        <input
+            type="password"
+            name="password_confirm"
+            placeholder="تکرار رمز عبور"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        >
+
+        <button type="submit">
+            ثبت‌نام
+        </button>
+
+    </form>
+
+    <p>
+        حساب دارید؟
+        <a href="{{ url_for('auth.login') }}">
+            وارد شوید
+        </a>
+    </p>
+
 </div>
+
 {% endblock %}

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from supabase_db import get, insert, update
 from datetime import datetime, timezone
+from werkzeug.security import generate_password_hash, check_password_hash
 import re
 
 auth_bp = Blueprint("auth", __name__)
@@ -19,6 +20,8 @@ def register():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         username = request.form.get("username", "").strip().lstrip("@")
+        password = request.form.get("password", "")
+        password_confirm = request.form.get("password_confirm", "")
 
         if not name:
             flash("نام را وارد کنید.")
@@ -26,6 +29,14 @@ def register():
 
         if not valid_username(username):
             flash("آیدی باید 3 تا 32 کاراکتر و فقط شامل حروف انگلیسی، عدد و _ باشد.")
+            return redirect(url_for("auth.register"))
+
+        if len(password) < 8:
+            flash("رمز عبور باید حداقل 8 کاراکتر باشد.")
+            return redirect(url_for("auth.register"))
+
+        if password != password_confirm:
+            flash("تکرار رمز عبور با رمز اصلی یکسان نیست.")
             return redirect(url_for("auth.register"))
 
         exists = get("users", {
@@ -37,11 +48,14 @@ def register():
             flash("این آیدی قبلاً گرفته شده است.")
             return redirect(url_for("auth.register"))
 
+        password_hash = generate_password_hash(password)
+
         created = insert(
             "users",
             {
                 "name": name,
                 "username": username,
+                "password_hash": password_hash,
                 "last_seen": now_utc()
             }
         )
@@ -75,6 +89,7 @@ def register():
                     }
                 )
 
+        session.clear()
         session["user_id"] = user["id"]
 
         return redirect(url_for("main.home"))
@@ -86,9 +101,14 @@ def register():
 def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip().lstrip("@")
+        password = request.form.get("password", "")
 
         if not valid_username(username):
             flash("آیدی واردشده معتبر نیست.")
+            return redirect(url_for("auth.login"))
+
+        if not password:
+            flash("رمز عبور را وارد کنید.")
             return redirect(url_for("auth.login"))
 
         users = get("users", {
@@ -97,10 +117,20 @@ def login():
         })
 
         if not users:
-            flash("کاربری با این آیدی پیدا نشد.")
+            flash("آیدی یا رمز عبور اشتباه است.")
             return redirect(url_for("auth.login"))
 
         user = users[0]
+
+        password_hash = user.get("password_hash")
+
+        if not password_hash:
+            flash("این حساب هنوز رمز عبور ندارد. لطفاً دوباره ثبت‌نام کنید.")
+            return redirect(url_for("auth.login"))
+
+        if not check_password_hash(password_hash, password):
+            flash("آیدی یا رمز عبور اشتباه است.")
+            return redirect(url_for("auth.login"))
 
         update(
             "users",
@@ -108,6 +138,7 @@ def login():
             {"last_seen": now_utc()}
         )
 
+        session.clear()
         session["user_id"] = user["id"]
 
         return redirect(url_for("main.home"))
