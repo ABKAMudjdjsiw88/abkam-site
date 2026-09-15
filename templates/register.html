@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}ثبت نام | ABKAM{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+<h1>ساخت حساب</h1>
+
+<form method="post">
+<input name="name" placeholder="نام شما" required>
+<input name="username" placeholder="آیدی انگلیسی، مثل alireza" required>
+
+<p class="hint">
+هر آیدی فقط یک بار قابل استفاده است.
+</p>
+
+<button>ثبت نام</button>
+</form>
+
+<a class="secondary" href="/login">قبلاً حساب دارم</a>
+</div>
+{% endblock %}

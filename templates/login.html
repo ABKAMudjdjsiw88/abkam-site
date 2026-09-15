@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}ورود | ABKAM{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+<h1>ورود به ABKAM</h1>
+<p class="muted">با آیدی خود وارد شوید</p>
+
+<form method="post">
+<input name="username" placeholder="@username" required>
+<button>ورود</button>
+</form>
+
+<a class="secondary" href="/register">ساخت حساب جدید</a>
+</div>
+{% endblock %}

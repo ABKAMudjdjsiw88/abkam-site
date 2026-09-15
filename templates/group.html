@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block content %}
+
+<div class="chat-page">
+
+<div class="chat-head">
+
+<a href="/groups" class="back">‹</a>
+
+<div class="avatar group-avatar">👥</div>
+
+<div class="grow">
+<b>{{ group.name }}</b>
+<small>{{ members|length }} عضو</small>
+</div>
+
+</div>
+
+<div id="messages" class="messages">
+
+{% for m in messages %}
+
+<div class="message {% if m.sender_id == session.get('user_id') %}mine{% else %}theirs{% endif %}">
+
+<div class="bubble">
+
+<small class="sender">
+{{ m.sender_name }} · @{{ m.sender_username }}
+</small>
+
+{% if m.message %}
+<div class="message-text">
+{{ m.message }}
+</div>
+{% endif %}
+
+<div class="time">
+{{ m.created_at }}
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<form id="groupForm" class="composer">
+
+<input
+name="message"
+id="groupMessage"
+placeholder="پیام در گروه..."
+autocomplete="off"
+>
+
+<button>➤</button>
+
+</form>
+
+</div>
+
+<script>
+
+const groupId = {{ group.id }};
+
+document.getElementById("groupForm")
+.addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const input = document.getElementById("groupMessage");
+
+if(!input.value.trim()) return;
+
+const data = new FormData(this);
+
+fetch("/api/group/"+groupId+"/send",{
+method:"POST",
+body:data
+})
+.then(r=>r.json())
+.then(result=>{
+
+if(result.ok){
+location.reload();
+}else{
+alert(result.error);
+}
+
+});
+
+});
+
+const box = document.getElementById("messages");
+box.scrollTop = box.scrollHeight;
+
+</script>
+
+{% endblock %}

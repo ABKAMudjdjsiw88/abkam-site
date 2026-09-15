@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}پروفایل من{% endblock %}
+
+{% block content %}
+
+<div class="profile-card">
+
+{% if u.avatar %}
+<img class="big-avatar" src="/uploads/avatars/{{ u.avatar }}">
+{% else %}
+<div class="big-avatar">👤</div>
+{% endif %}
+
+<h1>{{ u.name }}</h1>
+<p>@{{ u.username }}</p>
+
+<p class="idbox">
+ID: {{ u.public_id }}
+</p>
+
+<form method="post" action="/profile/update" enctype="multipart/form-data">
+
+<input name="name" value="{{ u.name }}" placeholder="نام">
+
+<textarea name="bio" placeholder="بیو">{{ u.bio }}</textarea>
+
+<label class="file-label">
+عکس پروفایل
+<input type="file" name="avatar" accept="image/*">
+</label>
+
+<button>ذخیره تغییرات</button>
+
+</form>
+
+</div>
+
+{% endblock %}

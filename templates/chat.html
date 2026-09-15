@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}چت با {{ other.name }}{% endblock %}
+
+{% block content %}
+
+<div class="chat-page">
+
+<div class="chat-head">
+
+<a href="/" class="back">‹</a>
+
+{% if other.avatar %}
+<img class="avatar" src="/uploads/avatars/{{ other.avatar }}">
+{% else %}
+<div class="avatar">👤</div>
+{% endif %}
+
+<div class="grow">
+<b>{{ other.name }}</b>
+<small id="online">
+@{{ other.username }}
+</small>
+</div>
+
+<button onclick="blockUser({{ other.id }})" class="icon-btn">🚫</button>
+
+</div>
+
+<div class="chat-search">
+<input id="chatSearch" placeholder="🔎 جستجو در گفتگو">
+</div>
+
+<div id="messages" class="messages">
+
+{% for m in messages %}
+
+<div class="message {% if m.sender_id == me.id %}mine{% else %}theirs{% endif %}"
+     data-id="{{ m.id }}">
+
+<div class="bubble">
+
+{% if m.reply_to %}
+<div class="reply-mini">
+پاسخ به پیام
+</div>
+{% endif %}
+
+{% if m.forwarded_from %}
+<div class="forward-mini">
+↪ پیام فوروارد شده
+</div>
+{% endif %}
+
+{% if m.message %}
+<div class="message-text">{{ m.message }}</div>
+{% endif %}
+
+{% if m.file_name %}
+
+{% if m.file_type and m.file_type.startswith("image/") %}
+<img class="media-image" src="/uploads/{{ m.file_name }}">
+{% elif m.file_type and m.file_type.startswith("video/") %}
+<video class="media" controls src="/uploads/{{ m.file_name }}"></video>
+{% elif m.file_type and m.file_type.startswith("audio/") %}
+<audio class="audio" controls src="/uploads/{{ m.file_name }}"></audio>
+{% else %}
+<a class="file-link" href="/uploads/{{ m.file_name }}" download>
+📎 {{ m.original_name }}
+</a>
+{% endif %}
+
+{% endif %}
+
+<div class="message-actions">
+<button onclick="replyMessage({{ m.id }})">↩</button>
+
+{% if m.sender_id == me.id %}
+<button onclick="editMessage({{ m.id }})">✏️</button>
+<button onclick="deleteMessage({{ m.id }})">🗑</button>
+{% endif %}
+
+<button onclick="reactMessage({{ m.id }}, '❤️')">❤️</button>
+<button onclick="reactMessage({{ m.id }}, '👍')">👍</button>
+<button onclick="reactMessage({{ m.id }}, '😂')">😂</button>
+<button onclick="forwardMessage({{ m.id }})">↪</button>
+</div>
+
+{% if m.reactions %}
+<div class="reactions">{{ m.reactions }}</div>
+{% endif %}
+
+<div class="time">
+{{ m.created_at }}
+{% if m.edited %} · ویرایش شد{% endif %}
+{% if m.sender_id == me.id %}
+{% if m.read_at %} ✓✓ {% else %} ✓ {% endif %}
+{% endif %}
+</div>
+
+</div>
+</div>
+
+{% endfor %}
+
+</div>
+
+<div id="replyBox" class="reply-box hidden">
+پاسخ به پیام
+<button onclick="cancelReply()">×</button>
+</div>
+
+<div id="uploadProgress" class="upload-progress hidden">
+<div id="progressBar"></div>
+<span id="progressText">0%</span>
+</div>
+
+<form id="sendForm" class="composer" enctype="multipart/form-data">
+
+<input type="hidden" id="replyTo" name="reply_to">
+<input type="hidden" id="forwardedFrom" name="forwarded_from">
+
+<label class="attach">
+📎
+<input type="file" name="file" id="fileInput">
+</label>
+
+<input
+    id="messageInput"
+    name="message"
+    autocomplete="off"
+    placeholder="پیام..."
+>
+
+<button type="submit" class="send">➤</button>
+
+</form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+const CHAT_USER = {{ other.id }};
+
+function scrollBottom(){
+    const box = document.getElementById("messages");
+    box.scrollTop = box.scrollHeight;
+}
+
+scrollBottom();
+
+document.getElementById("sendForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const form = this;
+    const input = document.getElementById("messageInput");
+    const file = document.getElementById("fileInput").files[0];
+
+    if(!input.value.trim() && !file){
+        return;
+    }
+
+    const data = new FormData(form);
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", "/api/send/" + CHAT_USER);
+
+    if(file){
+        document.getElementById("uploadProgress").classList.remove("hidden");
+
+        xhr.upload.onprogress = function(e){
+
+            if(e.lengthComputable){
+
+                const percent = Math.round(
+                    (e.loaded / e.total) * 100
+                );
+
+                document.getElementById("progressBar").style.width =
+                    percent + "%";
+
+                document.getElementById("progressText").innerText =
+                    percent + "%";
+            }
+        };
+    }
+
+    xhr.onload = function(){
+
+        document.getElementById("uploadProgress")
+            .classList.add("hidden");
+
+        if(xhr.status === 200){
+
+            const result = JSON.parse(xhr.responseText);
+
+            if(result.ok){
+                location.reload();
+            }else{
+                alert(result.error || "خطا");
+            }
+
+        }else{
+
+            try{
+                const result = JSON.parse(xhr.responseText);
+                alert(result.error || "خطا");
+            }catch{
+                alert("خطا در ارسال");
+            }
+
+        }
+    };
+
+    xhr.send(data);
+});
+
+function replyMessage(id){
+
+    document.getElementById("replyTo").value = id;
+
+    document.getElementById("replyBox")
+        .classList.remove("hidden");
+
+    document.getElementById("messageInput").focus();
+}
+
+function cancelReply(){
+
+    document.getElementById("replyTo").value = "";
+
+    document.getElementById("replyBox")
+        .classList.add("hidden");
+}
+
+function editMessage(id){
+
+    const text = prompt("متن جدید پیام:");
+
+    if(!text) return;
+
+    const data = new FormData();
+
+    data.append("message", text);
+
+    fetch("/api/message/" + id, {
+        method:"PUT",
+        body:data
+    }).then(() => location.reload());
+}
+
+function deleteMessage(id){
+
+    if(!confirm("پیام حذف شود؟")) return;
+
+    fetch("/api/message/" + id, {
+        method:"DELETE"
+    }).then(() => location.reload());
+}
+
+function reactMessage(id, emoji){
+
+    const data = new FormData();
+
+    data.append("emoji", emoji);
+
+    fetch("/api/message/" + id + "/react", {
+        method:"POST",
+        body:data
+    }).then(() => location.reload());
+}
+
+function forwardMessage(id){
+
+    document.getElementById("forwardedFrom").value = id;
+
+    alert("حالا متن یا فایل را برای فوروارد ارسال کنید.");
+
+    document.getElementById("messageInput").focus();
+}
+
+function blockUser(id){
+
+    if(!confirm("این کاربر بلاک شود؟")) return;
+
+    fetch("/api/block/" + id, {
+        method:"POST"
+    }).then(() => {
+        alert("کاربر بلاک شد.");
+        location.href="/";
+    });
+}
+
+document.getElementById("chatSearch")
+.addEventListener("input", function(){
+
+    const q = this.value.toLowerCase();
+
+    document.querySelectorAll(".message")
+    .forEach(function(message){
+
+        message.style.display =
+            message.innerText.toLowerCase().includes(q)
+            ? ""
+            : "none";
+
+    });
+
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}پیام‌های {{ u.name }}{% endblock %}
+
+{% block content %}
+
+<div class="owner-head">
+
+<div>
+<h1>{{ u.name }}</h1>
+<p>@{{ u.username }}</p>
+</div>
+
+<a class="button" href="/owner/panel">
+بازگشت
+</a>
+
+</div>
+
+<div class="owner-messages">
+
+{% for m in messages %}
+
+<div class="owner-message">
+
+<div>
+<b>
+@{{ m.sender_username }}
+{% if m.receiver_username %}
+→ @{{ m.receiver_username }}
+{% else %}
+→ گروه
+{% endif %}
+</b>
+</div>
+
+{% if m.message %}
+<p>{{ m.message }}</p>
+{% endif %}
+
+{% if m.original_name %}
+<p>📎 {{ m.original_name }}</p>
+{% endif %}
+
+<small>{{ m.created_at }}</small>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+پیامی وجود ندارد.
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

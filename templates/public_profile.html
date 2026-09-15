@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}پروفایل{% endblock %}
+
+{% block content %}
+
+<div class="profile-card">
+
+{% if u.avatar %}
+<img class="big-avatar" src="/uploads/avatars/{{ u.avatar }}">
+{% else %}
+<div class="big-avatar">👤</div>
+{% endif %}
+
+<h1>{{ u.name }}</h1>
+<p>@{{ u.username }}</p>
+
+{% if u.bio %}
+<p class="bio">{{ u.bio }}</p>
+{% endif %}
+
+<p class="muted">
+لینک پروفایل: /profile/{{ u.id }}
+</p>
+
+<a class="button" href="/chat/{{ u.id }}">💬 شروع چت</a>
+
+</div>
+
+{% endblock %}

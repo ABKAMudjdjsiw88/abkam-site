@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}پنل مالک{% endblock %}
+
+{% block content %}
+
+<div class="owner-head">
+
+<div>
+<h1>پنل مالک ABKAM</h1>
+<p>مدیریت سایت</p>
+</div>
+
+<a class="danger" href="/owner/logout">خروج</a>
+
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<b>{{ stats.users }}</b>
+<small>کاربر</small>
+</div>
+
+<div class="stat">
+<b>{{ stats.messages }}</b>
+<small>پیام</small>
+</div>
+
+<div class="stat">
+<b>{{ stats.groups }}</b>
+<small>گروه</small>
+</div>
+
+<div class="stat">
+<b>{{ stats.reports }}</b>
+<small>گزارش</small>
+</div>
+
+</div>
+
+<h2>کاربران</h2>
+
+{% for u in users %}
+
+<div class="list-item">
+
+{% if u.avatar %}
+<img class="avatar" src="/uploads/avatars/{{ u.avatar }}">
+{% else %}
+<div class="avatar">👤</div>
+{% endif %}
+
+<div class="grow">
+
+<b>{{ u.name }}</b>
+<small>@{{ u.username }}</small>
+
+</div>
+
+<a class="button small" href="/owner/chat/{{ u.id }}">
+مشاهده پیام‌ها
+</a>
+
+</div>
+
+{% endfor %}
+
+<h2>گزارش‌ها</h2>
+
+{% for r in reports %}
+
+<div class="report">
+
+<b>@{{ r.reported_username }}</b>
+
+<p>{{ r.reason }}</p>
+
+<small>
+گزارش توسط @{{ r.reporter_username }}
+· {{ r.created_at }}
+</small>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+گزارشی وجود ندارد.
+</div>
+
+{% endfor %}
+
+{% endblock %}

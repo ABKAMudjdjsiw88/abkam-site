@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}جستجو | ABKAM{% endblock %}
+
+{% block content %}
+
+<h1>جستجو</h1>
+
+<form class="search-box" action="/users">
+<input name="q" value="{{ q }}" placeholder="نام یا آیدی">
+<button>جستجو</button>
+</form>
+
+{% if q %}
+
+{% if results %}
+
+{% for u in results %}
+<a class="list-item" href="/profile/{{ u.id }}">
+
+{% if u.avatar %}
+<img class="avatar" src="/uploads/avatars/{{ u.avatar }}">
+{% else %}
+<div class="avatar">👤</div>
+{% endif %}
+
+<div>
+<b>{{ u.name }}</b>
+<small>@{{ u.username }}</small>
+</div>
+
+</a>
+{% endfor %}
+
+{% else %}
+<div class="empty">
+کاربری پیدا نشد.
+</div>
+{% endif %}
+
+{% else %}
+
+<div class="empty">
+نام یا آیدی را وارد کنید.
+</div>
+
+{% endif %}
+
+{% endblock %}

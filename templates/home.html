@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}ABKAM{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <h1>سلام {{ me.name }} 👋</h1>
+    <p>برای پیدا کردن افراد، نام یا آیدی را جستجو کنید.</p>
+</div>
+
+<form class="search-box" action="/users">
+    <input name="q" placeholder="🔎 جستجوی نام یا آیدی">
+    <button>جستجو</button>
+</form>
+
+<section>
+<h2>گروه‌ها</h2>
+
+{% for g in groups %}
+<a class="list-item" href="/group/{{ g.id }}">
+    <div class="avatar group-avatar">👥</div>
+    <div>
+        <b>{{ g.name }}</b>
+        <small>{{ g.description }}</small>
+    </div>
+</a>
+{% endfor %}
+</section>
+
+<section>
+<h2>گفتگوهای من</h2>
+
+{% if chats %}
+{% for c in chats %}
+<a class="list-item" href="/chat/{{ c.id }}">
+    {% if c.avatar %}
+    <img class="avatar" src="/uploads/avatars/{{ c.avatar }}">
+    {% else %}
+    <div class="avatar">👤</div>
+    {% endif %}
+
+    <div class="grow">
+        <b>{{ c.name }}</b>
+        <small>@{{ c.username }}</small>
+    </div>
+
+    {% if c.unread %}
+    <span class="badge">{{ c.unread }}</span>
+    {% endif %}
+</a>
+{% endfor %}
+{% else %}
+<div class="empty">
+هنوز گفتگویی ندارید.<br>
+از قسمت جستجو یک نفر را پیدا کنید.
+</div>
+{% endif %}
+
+</section>
+
+{% endblock %}

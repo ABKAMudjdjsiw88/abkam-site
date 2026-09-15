@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}اعلان‌ها{% endblock %}
+
+{% block content %}
+
+<h1>اعلان‌ها</h1>
+
+{% for n in notifications %}
+
+<a class="notification" href="{{ n.link or '#' }}">
+<b>{{ n.message }}</b>
+<small>{{ n.created_at }}</small>
+</a>
+
+{% else %}
+
+<div class="empty">
+اعلانی ندارید.
+</div>
+
+{% endfor %}
+
+{% endblock %}
