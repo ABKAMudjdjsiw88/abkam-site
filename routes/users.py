@@ -92,7 +92,8 @@ def public_profile(user_id):
 
     return render_template(
         "profile.html",
-        user=user
+        user=user,
+        u=user
     )
 
 
@@ -119,5 +120,6 @@ def public_profile_link(public_id):
 
     return render_template(
         "profile.html",
-        user=user
+        user=user,
+        u=user
     )
