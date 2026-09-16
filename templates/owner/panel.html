@@ -61,6 +61,15 @@
 مشاهده پیام‌ها
 </a>
 
+<form method="post"
+      action="/owner/delete-user/{{ u.id }}"
+      style="display:inline;"
+      onsubmit="return confirm('آیا مطمئن هستید؟ این کار تمام اطلاعات این کاربر را حذف می‌کند و قابل بازگشت نیست.');">
+    <button type="submit" class="danger small">
+        حذف کاربر
+    </button>
+</form>
+
 </div>
 
 {% endfor %}

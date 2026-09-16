@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
-from supabase_db import get
+from supabase_db import get, delete
 from config import OWNER_USERNAME, OWNER_PASSWORD
 
 owner_bp = Blueprint("owner", __name__, url_prefix="/owner")
@@ -78,6 +78,40 @@ def panel():
         reports=reports,
         stats=stats
     )
+
+
+@owner_bp.route("/delete-user/<int:user_id>", methods=["POST"])
+def delete_user(user_id):
+    check = owner_required()
+    if check:
+        return check
+
+    users = get("users", {
+        "id": f"eq.{user_id}",
+        "limit": 1
+    }) or []
+
+    if not users:
+        return "کاربر پیدا نشد.", 404
+
+    # حذف پیام‌های ارسال‌شده و دریافت‌شده
+    delete("messages", {"sender_id": f"eq.{user_id}"})
+    delete("messages", {"receiver_id": f"eq.{user_id}"})
+
+    # حذف عضویت‌های گروهی
+    delete("group_members", {"user_id": f"eq.{user_id}"})
+
+    # حذف اعلان‌ها
+    delete("notifications", {"user_id": f"eq.{user_id}"})
+
+    # حذف گزارش‌های مرتبط با کاربر
+    delete("reports", {"reported_user_id": f"eq.{user_id}"})
+    delete("reports", {"reporter_id": f"eq.{user_id}"})
+
+    # در نهایت حذف خود حساب
+    delete("users", {"id": f"eq.{user_id}"})
+
+    return redirect(url_for("owner.panel"))
 
 
 @owner_bp.route("/chat/<int:user_id>")
