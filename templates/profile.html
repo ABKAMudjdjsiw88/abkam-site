@@ -6,33 +6,39 @@
 
 <div class="profile-card">
 
-{% if u.avatar %}
-<img class="big-avatar" src="/uploads/avatars/{{ u.avatar }}">
-{% else %}
-<div class="big-avatar">👤</div>
-{% endif %}
+    {% if u.avatar %}
+    <img class="big-avatar" src="/uploads/avatars/{{ u.avatar }}">
+    {% else %}
+    <div class="big-avatar">👤</div>
+    {% endif %}
 
-<h1>{{ u.name }}</h1>
-<p>@{{ u.username }}</p>
+    <h1>{{ u.name }}</h1>
+    <p>@{{ u.username }}</p>
 
-<p class="idbox">
-ID: {{ u.public_id }}
-</p>
+    <p class="idbox">
+        ID: {{ u.public_id }}
+    </p>
 
-<form method="post" action="/profile/update" enctype="multipart/form-data">
+    {% if u.id != session.get('user_id') %}
+    <a href="{{ url_for('chat.chat', user_id=u.id) }}" class="profile-chat-btn">
+        💬 پیام دادن
+    </a>
+    {% endif %}
 
-<input name="name" value="{{ u.name }}" placeholder="نام">
+    <form method="post" action="/profile/update" enctype="multipart/form-data">
 
-<textarea name="bio" placeholder="بیو">{{ u.bio }}</textarea>
+        <input name="name" value="{{ u.name }}" placeholder="نام">
 
-<label class="file-label">
-عکس پروفایل
-<input type="file" name="avatar" accept="image/*">
-</label>
+        <textarea name="bio" placeholder="بیو">{{ u.bio }}</textarea>
 
-<button>ذخیره تغییرات</button>
+        <label class="file-label">
+            عکس پروفایل
+            <input type="file" name="avatar" accept="image/*">
+        </label>
 
-</form>
+        <button>ذخیره تغییرات</button>
+
+    </form>
 
 </div>
 
