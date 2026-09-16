@@ -2,6 +2,7 @@
 {% block title %}پروفایل من{% endblock %}
 
 {% block content %}
+{% set u = user if user is defined else me %}
 
 <div class="profile-card">
 
