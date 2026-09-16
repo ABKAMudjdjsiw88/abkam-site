@@ -951,3 +951,20 @@ body.auth-page .container{
     z-index:1;
 }
 
+
+/* OWNER LOGIN - FORCE SAME BACKGROUND */
+
+body.auth-page{
+    background-color:#031228 !important;
+    background-image:
+        linear-gradient(
+            rgba(3,18,40,.35),
+            rgba(3,18,40,.50)
+        ),
+        url("/static/images/abkam-bg.png") !important;
+    background-size:cover !important;
+    background-position:center !important;
+    background-repeat:no-repeat !important;
+    background-attachment:fixed !important;
+}
+
