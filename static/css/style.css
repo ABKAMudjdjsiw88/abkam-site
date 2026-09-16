@@ -920,3 +920,34 @@ body.auth-page .container{
     z-index:1;
 }
 
+
+/* FINAL AUTH BACKGROUND FIX */
+
+html{
+    min-height:100%;
+}
+
+html body.auth-page{
+    background-image:
+        linear-gradient(
+            rgba(3,18,40,.35),
+            rgba(3,18,40,.50)
+        ),
+        url("/static/images/abkam-bg.png") !important;
+
+    background-size:cover !important;
+    background-position:center !important;
+    background-repeat:no-repeat !important;
+    background-attachment:fixed !important;
+    min-height:100vh !important;
+}
+
+body.auth-page::before{
+    display:none !important;
+}
+
+body.auth-page .container{
+    position:relative;
+    z-index:1;
+}
+
