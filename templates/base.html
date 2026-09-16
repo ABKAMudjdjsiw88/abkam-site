@@ -1,23 +1,38 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>{% block title %}ABKAM{% endblock %}</title>
-<link rel="stylesheet" href="/static/css/style.css">
+    <meta charset="utf-8">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+    >
 
+    <title>{% block title %}ABKAM{% endblock %}</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- فونت فارسی -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 </head>
 
-<body class="{% if request.endpoint in ['auth.login', 'auth.register'] %}auth-page{% endif %}">
+<body class="{% if request.path in ['/login', '/register'] %}auth-page{% endif %}">
 
 <header class="topbar">
-    <a class="brand" href="/">ABKAM</a>
+
+    <a class="brand" href="/">
+        ABKAM
+    </a>
 
     {% if session.get("user_id") %}
+
     <nav>
         <a href="/">خانه</a>
         <a href="/groups">گروه‌ها</a>
@@ -25,26 +40,38 @@
         <a href="/profile">پروفایل</a>
         <a href="/logout">خروج</a>
     </nav>
+
     {% endif %}
+
 </header>
+
 
 <main class="container">
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<div class="flash">
-{% for m in messages %}
-{{ m }}
-{% endfor %}
-</div>
-{% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages() %}
 
-{% block content %}{% endblock %}
+        {% if messages %}
+
+            <div class="flash">
+
+                {% for m in messages %}
+                    {{ m }}
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    {% block content %}{% endblock %}
 
 </main>
 
+
 <script src="/static/js/app.js"></script>
+
 {% block scripts %}{% endblock %}
 
 </body>
