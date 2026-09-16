@@ -892,3 +892,31 @@ body.auth-page .auth-card{
     margin-top:20px;
     margin-bottom:20px;
 }
+
+/* FORCE ABKAM AUTH BACKGROUND */
+body.auth-page::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+
+    background-image:
+        linear-gradient(
+            rgba(3,18,40,.40),
+            rgba(3,18,40,.55)
+        ),
+        url("/static/images/abkam-bg.png");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    pointer-events:none;
+}
+
+body.auth-page .topbar,
+body.auth-page .container{
+    position:relative;
+    z-index:1;
+}
+
