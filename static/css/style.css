@@ -862,3 +862,33 @@ body{
 }
 
 EOF
+/* =================================
+   ABKAM AUTH BACKGROUND
+   ================================= */
+
+body:has(.auth-card){
+    background:
+        linear-gradient(
+            rgba(3, 18, 40, .48),
+            rgba(3, 18, 40, .62)
+        ),
+        url("/static/images/abkam-bg.png");
+
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+
+    min-height:100vh;
+}
+
+body:has(.auth-card) .container{
+    min-height:calc(100vh - 60px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+body:has(.auth-card) .auth-card{
+    margin-top:20px;
+    margin-bottom:20px;
+}
