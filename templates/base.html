@@ -12,7 +12,7 @@
 
 </head>
 
-<body>
+<body class="{% if request.endpoint in ['auth.login', 'auth.register'] %}auth-page{% endif %}">
 
 <header class="topbar">
     <a class="brand" href="/">ABKAM</a>

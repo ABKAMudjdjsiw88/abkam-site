@@ -866,7 +866,7 @@ EOF
    ABKAM AUTH BACKGROUND
    ================================= */
 
-body:has(.auth-card){
+body.auth-page{
     background:
         linear-gradient(
             rgba(3, 18, 40, .48),
@@ -881,14 +881,14 @@ body:has(.auth-card){
     min-height:100vh;
 }
 
-body:has(.auth-card) .container{
+body.auth-page .container{
     min-height:calc(100vh - 60px);
     display:flex;
     flex-direction:column;
     justify-content:center;
 }
 
-body:has(.auth-card) .auth-card{
+body.auth-page .auth-card{
     margin-top:20px;
     margin-bottom:20px;
 }
