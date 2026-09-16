@@ -1,155 +1,297 @@
 {% extends "base.html" %}
+
 {% block title %}چت با {{ other.name }}{% endblock %}
 
 {% block content %}
-
 <div class="chat-page">
 
-<div class="chat-head">
+    <div class="chat-head">
+        <a href="/" class="back">‹</a>
 
-<a href="/" class="back">‹</a>
+        {% if other.avatar %}
+            <img class="avatar" src="{{ other.avatar }}">
+        {% else %}
+            <div class="avatar">👤</div>
+        {% endif %}
 
-{% if other.avatar %}
-<img class="avatar" src="/uploads/avatars/{{ other.avatar }}">
-{% else %}
-<div class="avatar">👤</div>
-{% endif %}
+        <div class="grow">
+            <b>{{ other.name }}</b>
+            <small id="online">@{{ other.username }}</small>
+        </div>
 
-<div class="grow">
-<b>{{ other.name }}</b>
-<small id="online">
-@{{ other.username }}
-</small>
+        <button onclick="reportUser({{ other.id }})" class="icon-btn">⚠️</button>
+        <button onclick="blockUser({{ other.id }})" class="icon-btn">🚫</button>
+    </div>
+
+    <div class="chat-search">
+        <input id="chatSearch" placeholder="🔎 جستجو در گفتگو">
+    </div>
+
+    <div id="messages" class="messages">
+        {% for m in messages %}
+        <div class="message {% if m.sender_id == me.id %}mine{% else %}theirs{% endif %}"
+             data-id="{{ m.id }}">
+
+            <div class="bubble">
+
+                {% if m.reply_to %}
+                    <div class="reply-mini">↩ پاسخ به پیام</div>
+                {% endif %}
+
+                {% if m.forwarded_from %}
+                    <div class="forward-mini">↪ پیام فوروارد شده</div>
+                {% endif %}
+
+                {% if m.message %}
+                    <div class="message-text">{{ m.message }}</div>
+                {% endif %}
+
+                {% if m.file_name %}
+                    {% if m.file_type and m.file_type.startswith("image/") %}
+                        <img class="media-image"
+                             src="https://vxvepvvgrtelmgarrgkc.supabase.co/storage/v1/object/public/abkam-files/{{ m.file_name }}">
+                    {% elif m.file_type and m.file_type.startswith("video/") %}
+                        <video class="media" controls
+                               src="https://vxvepvvgrtelmgarrgkc.supabase.co/storage/v1/object/public/abkam-files/{{ m.file_name }}"></video>
+                    {% elif m.file_type and m.file_type.startswith("audio/") %}
+                        <audio class="audio" controls
+                               src="https://vxvepvvgrtelmgarrgkc.supabase.co/storage/v1/object/public/abkam-files/{{ m.file_name }}"></audio>
+                    {% else %}
+                        <a class="file-link"
+                           href="https://vxvepvvgrtelmgarrgkc.supabase.co/storage/v1/object/public/abkam-files/{{ m.file_name }}"
+                           target="_blank"
+                           download>
+                            📎 {{ m.original_name }}
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                <div class="message-actions">
+                    <button onclick="replyMessage({{ m.id }})">↩</button>
+
+                    {% if m.sender_id == me.id %}
+                        <button onclick="editMessage({{ m.id }})">✏️</button>
+                        <button onclick="deleteMessage({{ m.id }})">🗑</button>
+                    {% endif %}
+
+                    <button onclick="reactMessage({{ m.id }}, '❤️')">❤️</button>
+                    <button onclick="reactMessage({{ m.id }}, '👍')">👍</button>
+                    <button onclick="reactMessage({{ m.id }}, '😂')">😂</button>
+                    <button onclick="reactMessage({{ m.id }}, '🔥')">🔥</button>
+
+                    <button onclick="forwardMessage({{ m.id }})">↪</button>
+                </div>
+
+                {% if m.reactions %}
+                    <div class="reactions">
+                        {% for r in m.reactions %}
+                            {{ r.reaction }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="time">
+                    {{ m.created_at }}
+
+                    {% if m.edited %}
+                        · ویرایش شد
+                    {% endif %}
+
+                    {% if m.sender_id == me.id %}
+                        {% if m.is_read %}
+                            ✓✓
+                        {% else %}
+                            ✓
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="replyBox" class="reply-box hidden">
+        <span>پاسخ به پیام</span>
+        <button onclick="cancelReply()">×</button>
+    </div>
+
+    <div id="uploadProgress" class="upload-progress hidden">
+        <div id="progressBar"></div>
+        <span id="progressText">0%</span>
+    </div>
+
+    <form id="sendForm" class="composer" enctype="multipart/form-data">
+
+        <input type="hidden" id="replyTo" name="reply_to">
+        <input type="hidden" id="forwardedFrom" name="forwarded_from">
+
+        <label class="attach">
+            📎
+            <input type="file" name="file" id="fileInput">
+        </label>
+
+        <input
+            id="messageInput"
+            name="message"
+            autocomplete="off"
+            placeholder="پیام..."
+        >
+
+        <button type="submit" class="send">➤</button>
+    </form>
+
 </div>
-
-<button onclick="blockUser({{ other.id }})" class="icon-btn">🚫</button>
-
-</div>
-
-<div class="chat-search">
-<input id="chatSearch" placeholder="🔎 جستجو در گفتگو">
-</div>
-
-<div id="messages" class="messages">
-
-{% for m in messages %}
-
-<div class="message {% if m.sender_id == me.id %}mine{% else %}theirs{% endif %}"
-     data-id="{{ m.id }}">
-
-<div class="bubble">
-
-{% if m.reply_to %}
-<div class="reply-mini">
-پاسخ به پیام
-</div>
-{% endif %}
-
-{% if m.forwarded_from %}
-<div class="forward-mini">
-↪ پیام فوروارد شده
-</div>
-{% endif %}
-
-{% if m.message %}
-<div class="message-text">{{ m.message }}</div>
-{% endif %}
-
-{% if m.file_name %}
-
-{% if m.file_type and m.file_type.startswith("image/") %}
-<img class="media-image" src="/uploads/{{ m.file_name }}">
-{% elif m.file_type and m.file_type.startswith("video/") %}
-<video class="media" controls src="/uploads/{{ m.file_name }}"></video>
-{% elif m.file_type and m.file_type.startswith("audio/") %}
-<audio class="audio" controls src="/uploads/{{ m.file_name }}"></audio>
-{% else %}
-<a class="file-link" href="/uploads/{{ m.file_name }}" download>
-📎 {{ m.original_name }}
-</a>
-{% endif %}
-
-{% endif %}
-
-<div class="message-actions">
-<button onclick="replyMessage({{ m.id }})">↩</button>
-
-{% if m.sender_id == me.id %}
-<button onclick="editMessage({{ m.id }})">✏️</button>
-<button onclick="deleteMessage({{ m.id }})">🗑</button>
-{% endif %}
-
-<button onclick="reactMessage({{ m.id }}, '❤️')">❤️</button>
-<button onclick="reactMessage({{ m.id }}, '👍')">👍</button>
-<button onclick="reactMessage({{ m.id }}, '😂')">😂</button>
-<button onclick="forwardMessage({{ m.id }})">↪</button>
-</div>
-
-{% if m.reactions %}
-<div class="reactions">{{ m.reactions }}</div>
-{% endif %}
-
-<div class="time">
-{{ m.created_at }}
-{% if m.edited %} · ویرایش شد{% endif %}
-{% if m.sender_id == me.id %}
-{% if m.read_at %} ✓✓ {% else %} ✓ {% endif %}
-{% endif %}
-</div>
-
-</div>
-</div>
-
-{% endfor %}
-
-</div>
-
-<div id="replyBox" class="reply-box hidden">
-پاسخ به پیام
-<button onclick="cancelReply()">×</button>
-</div>
-
-<div id="uploadProgress" class="upload-progress hidden">
-<div id="progressBar"></div>
-<span id="progressText">0%</span>
-</div>
-
-<form id="sendForm" class="composer" enctype="multipart/form-data">
-
-<input type="hidden" id="replyTo" name="reply_to">
-<input type="hidden" id="forwardedFrom" name="forwarded_from">
-
-<label class="attach">
-📎
-<input type="file" name="file" id="fileInput">
-</label>
-
-<input
-    id="messageInput"
-    name="message"
-    autocomplete="off"
-    placeholder="پیام..."
->
-
-<button type="submit" class="send">➤</button>
-
-</form>
-
-</div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
 
 const CHAT_USER = {{ other.id }};
+let lastMessagesSignature = "";
 
 function scrollBottom(){
     const box = document.getElementById("messages");
-    box.scrollTop = box.scrollHeight;
+    if(box){
+        box.scrollTop = box.scrollHeight;
+    }
 }
 
-scrollBottom();
+function escapeHtml(text){
+    const div = document.createElement("div");
+    div.textContent = text ?? "";
+    return div.innerHTML;
+}
+
+function renderMessages(messages){
+
+    const box = document.getElementById("messages");
+
+    const signature = JSON.stringify(messages);
+
+    if(signature === lastMessagesSignature){
+        return;
+    }
+
+    lastMessagesSignature = signature;
+
+    box.innerHTML = "";
+
+    messages.forEach(function(m){
+
+        const mine = Number(m.sender_id) === Number({{ me.id }});
+
+        let html = `
+            <div class="message ${mine ? "mine" : "theirs"}" data-id="${m.id}">
+                <div class="bubble">
+        `;
+
+        if(m.reply_to){
+            html += `<div class="reply-mini">↩ پاسخ به پیام</div>`;
+        }
+
+        if(m.forwarded_from){
+            html += `<div class="forward-mini">↪ پیام فوروارد شده</div>`;
+        }
+
+        if(m.message){
+            html += `<div class="message-text">${escapeHtml(m.message)}</div>`;
+        }
+
+        if(m.file_name){
+
+            const url =
+                "https://vxvepvvgrtelmgarrgkc.supabase.co/storage/v1/object/public/abkam-files/"
+                + encodeURIComponent(m.file_name);
+
+            if(m.file_type && m.file_type.startsWith("image/")){
+                html += `<img class="media-image" src="${url}">`;
+            }
+            else if(m.file_type && m.file_type.startsWith("video/")){
+                html += `<video class="media" controls src="${url}"></video>`;
+            }
+            else if(m.file_type && m.file_type.startsWith("audio/")){
+                html += `<audio class="audio" controls src="${url}"></audio>`;
+            }
+            else{
+                html += `<a class="file-link" href="${url}" target="_blank" download>📎 ${escapeHtml(m.original_name || "فایل")}</a>`;
+            }
+        }
+
+        html += `
+            <div class="message-actions">
+                <button onclick="replyMessage(${m.id})">↩</button>
+        `;
+
+        if(mine){
+            html += `
+                <button onclick="editMessage(${m.id})">✏️</button>
+                <button onclick="deleteMessage(${m.id})">🗑</button>
+            `;
+        }
+
+        html += `
+                <button onclick="reactMessage(${m.id}, '❤️')">❤️</button>
+                <button onclick="reactMessage(${m.id}, '👍')">👍</button>
+                <button onclick="reactMessage(${m.id}, '😂')">😂</button>
+                <button onclick="reactMessage(${m.id}, '🔥')">🔥</button>
+                <button onclick="forwardMessage(${m.id})">↪</button>
+            </div>
+        `;
+
+        if(m.reactions && m.reactions.length){
+            html += `<div class="reactions">`;
+
+            m.reactions.forEach(function(r){
+                html += escapeHtml(r.reaction || "");
+            });
+
+            html += `</div>`;
+        }
+
+        html += `
+            <div class="time">
+                ${escapeHtml(m.created_at || "")}
+                ${m.edited ? " · ویرایش شد" : ""}
+                ${mine ? (m.is_read ? " ✓✓" : " ✓") : ""}
+            </div>
+        `;
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        box.insertAdjacentHTML("beforeend", html);
+    });
+
+    scrollBottom();
+}
+
+
+async function loadMessages(){
+
+    try{
+
+        const response = await fetch("/api/chat/" + CHAT_USER, {
+            cache: "no-store"
+        });
+
+        if(!response.ok){
+            return;
+        }
+
+        const result = await response.json();
+
+        if(result.ok){
+            renderMessages(result.messages || []);
+        }
+
+    }catch(error){
+        console.log("chat update error", error);
+    }
+}
+
 
 document.getElementById("sendForm").addEventListener("submit", function(e){
 
@@ -157,7 +299,8 @@ document.getElementById("sendForm").addEventListener("submit", function(e){
 
     const form = this;
     const input = document.getElementById("messageInput");
-    const file = document.getElementById("fileInput").files[0];
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
 
     if(!input.value.trim() && !file){
         return;
@@ -170,21 +313,22 @@ document.getElementById("sendForm").addEventListener("submit", function(e){
     xhr.open("POST", "/api/send/" + CHAT_USER);
 
     if(file){
-        document.getElementById("uploadProgress").classList.remove("hidden");
+
+        document.getElementById("uploadProgress")
+            .classList.remove("hidden");
 
         xhr.upload.onprogress = function(e){
 
             if(e.lengthComputable){
 
-                const percent = Math.round(
-                    (e.loaded / e.total) * 100
-                );
+                const percent =
+                    Math.round((e.loaded / e.total) * 100);
 
-                document.getElementById("progressBar").style.width =
-                    percent + "%";
+                document.getElementById("progressBar")
+                    .style.width = percent + "%";
 
-                document.getElementById("progressText").innerText =
-                    percent + "%";
+                document.getElementById("progressText")
+                    .innerText = percent + "%";
             }
         };
     }
@@ -194,30 +338,40 @@ document.getElementById("sendForm").addEventListener("submit", function(e){
         document.getElementById("uploadProgress")
             .classList.add("hidden");
 
-        if(xhr.status === 200){
+        try{
 
             const result = JSON.parse(xhr.responseText);
 
             if(result.ok){
-                location.reload();
+
+                form.reset();
+                cancelReply();
+
+                lastMessagesSignature = "";
+
+                loadMessages();
+
             }else{
-                alert(result.error || "خطا");
+
+                alert(result.error || "خطا در ارسال پیام");
             }
 
-        }else{
+        }catch(error){
 
-            try{
-                const result = JSON.parse(xhr.responseText);
-                alert(result.error || "خطا");
-            }catch{
-                alert("خطا در ارسال");
-            }
-
+            alert("خطا در ارسال پیام");
         }
+    };
+
+    xhr.onerror = function(){
+        document.getElementById("uploadProgress")
+            .classList.add("hidden");
+
+        alert("ارتباط با سرور برقرار نشد.");
     };
 
     xhr.send(data);
 });
+
 
 function replyMessage(id){
 
@@ -229,6 +383,7 @@ function replyMessage(id){
     document.getElementById("messageInput").focus();
 }
 
+
 function cancelReply(){
 
     document.getElementById("replyTo").value = "";
@@ -237,30 +392,63 @@ function cancelReply(){
         .classList.add("hidden");
 }
 
+
 function editMessage(id){
 
     const text = prompt("متن جدید پیام:");
 
-    if(!text) return;
+    if(!text || !text.trim()){
+        return;
+    }
 
     const data = new FormData();
 
-    data.append("message", text);
+    data.append("message", text.trim());
 
     fetch("/api/message/" + id, {
-        method:"PUT",
-        body:data
-    }).then(() => location.reload());
+        method: "PUT",
+        body: data
+    })
+    .then(response => response.json())
+    .then(result => {
+
+        if(!result.ok){
+            alert(result.error || "خطا");
+            return;
+        }
+
+        lastMessagesSignature = "";
+        loadMessages();
+
+    })
+    .catch(() => alert("خطا در ویرایش پیام"));
 }
+
 
 function deleteMessage(id){
 
-    if(!confirm("پیام حذف شود؟")) return;
+    if(!confirm("پیام حذف شود؟")){
+        return;
+    }
 
     fetch("/api/message/" + id, {
-        method:"DELETE"
-    }).then(() => location.reload());
+        method: "DELETE"
+    })
+    .then(response => response.json())
+    .then(result => {
+
+        if(!result.ok){
+            alert(result.error || "خطا");
+            return;
+        }
+
+        lastMessagesSignature = "";
+        loadMessages();
+
+    })
+    .catch(() => alert("خطا در حذف پیام"));
 }
+
 
 function reactMessage(id, emoji){
 
@@ -269,48 +457,110 @@ function reactMessage(id, emoji){
     data.append("emoji", emoji);
 
     fetch("/api/message/" + id + "/react", {
-        method:"POST",
-        body:data
-    }).then(() => location.reload());
+        method: "POST",
+        body: data
+    })
+    .then(response => response.json())
+    .then(result => {
+
+        if(!result.ok){
+            alert(result.error || "خطا");
+            return;
+        }
+
+        lastMessagesSignature = "";
+        loadMessages();
+
+    });
 }
+
 
 function forwardMessage(id){
 
     document.getElementById("forwardedFrom").value = id;
 
-    alert("حالا متن یا فایل را برای فوروارد ارسال کنید.");
+    alert("حالا پیام یا فایل را ارسال کنید تا به عنوان فوروارد ثبت شود.");
 
     document.getElementById("messageInput").focus();
 }
 
+
 function blockUser(id){
 
-    if(!confirm("این کاربر بلاک شود؟")) return;
+    if(!confirm("این کاربر بلاک شود؟")){
+        return;
+    }
 
     fetch("/api/block/" + id, {
-        method:"POST"
-    }).then(() => {
-        alert("کاربر بلاک شد.");
-        location.href="/";
+        method: "POST"
+    })
+    .then(response => response.json())
+    .then(result => {
+
+        if(result.ok){
+
+            alert("کاربر بلاک شد.");
+
+            window.location.href = "/";
+
+        }else{
+
+            alert(result.error || "خطا در بلاک کردن کاربر");
+        }
     });
 }
 
-document.getElementById("chatSearch")
-.addEventListener("input", function(){
 
-    const q = this.value.toLowerCase();
+function reportUser(id){
 
-    document.querySelectorAll(".message")
-    .forEach(function(message){
+    const reason = prompt("دلیل گزارش این کاربر را بنویسید:");
+
+    if(!reason || !reason.trim()){
+        return;
+    }
+
+    const data = new FormData();
+
+    data.append("reason", reason.trim());
+
+    fetch("/report/" + id, {
+        method: "POST",
+        body: data
+    })
+    .then(response => response.json())
+    .then(result => {
+
+        if(result.ok){
+            alert("گزارش شما ثبت شد.");
+        }else{
+            alert(result.error || "خطا در ثبت گزارش");
+        }
+    })
+    .catch(() => {
+        alert("خطا در ثبت گزارش");
+    });
+}
+
+
+document.getElementById("chatSearch").addEventListener("input", function(){
+
+    const q = this.value.toLowerCase().trim();
+
+    document.querySelectorAll(".message").forEach(function(message){
 
         message.style.display =
             message.innerText.toLowerCase().includes(q)
             ? ""
             : "none";
-
     });
-
 });
+
+
+scrollBottom();
+
+loadMessages();
+
+setInterval(loadMessages, 3000);
 
 </script>
 {% endblock %}
