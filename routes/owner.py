@@ -86,32 +86,54 @@ def delete_user(user_id):
     if check:
         return check
 
-    users = get("users", {
-        "id": f"eq.{user_id}",
-        "limit": 1
-    }) or []
+    try:
+        users = get("users", {
+            "id": f"eq.{user_id}",
+            "limit": 1
+        }) or []
 
-    if not users:
-        return "کاربر پیدا نشد.", 404
+        if not users:
+            return "کاربر پیدا نشد.", 404
 
-    # حذف پیام‌های ارسال‌شده و دریافت‌شده
-    delete("messages", {"sender_id": f"eq.{user_id}"})
-    delete("messages", {"receiver_id": f"eq.{user_id}"})
+        print(f"[OWNER DELETE] شروع حذف کاربر {user_id}")
 
-    # حذف عضویت‌های گروهی
-    delete("group_members", {"user_id": f"eq.{user_id}"})
+        # موارد وابسته؛ اگر یکی از جدول‌های اختیاری مشکل داشت،
+        # حذف بقیه موارد متوقف نمی‌شود.
+        delete_tasks = [
+            ("messages - sender", "messages", {"sender_id": f"eq.{user_id}"}),
+            ("messages - receiver", "messages", {"receiver_id": f"eq.{user_id}"}),
+            ("group_members", "group_members", {"user_id": f"eq.{user_id}"}),
+            ("notifications", "notifications", {"user_id": f"eq.{user_id}"}),
+            ("reports reported", "reports", {"reported_user_id": f"eq.{user_id}"}),
+            ("reports reporter", "reports", {"reporter_id": f"eq.{user_id}"})
+        ]
 
-    # حذف اعلان‌ها
-    delete("notifications", {"user_id": f"eq.{user_id}"})
+        for name, table, filters in delete_tasks:
+            try:
+                delete(table, filters)
+                print(f"[OWNER DELETE] {name}: OK")
+            except Exception as e:
+                print(f"[OWNER DELETE] {name}: SKIPPED -> {e}")
 
-    # حذف گزارش‌های مرتبط با کاربر
-    delete("reports", {"reported_user_id": f"eq.{user_id}"})
-    delete("reports", {"reporter_id": f"eq.{user_id}"})
+        # حذف خود حساب؛ این قسمت باید موفق شود.
+        print("[OWNER DELETE] deleting user...")
+        delete("users", {"id": f"eq.{user_id}"})
 
-    # در نهایت حذف خود حساب
-    delete("users", {"id": f"eq.{user_id}"})
+        print(f"[OWNER DELETE] user {user_id} deleted successfully")
 
-    return redirect(url_for("owner.panel"))
+        return redirect(url_for("owner.panel"))
+
+    except Exception as e:
+        print("[OWNER DELETE ERROR]", repr(e))
+
+        return (
+            "<h2>خطا هنگام حذف کاربر</h2>"
+            "<p>خود حساب حذف نشد.</p>"
+            "<pre>"
+            + str(e)
+            + "</pre>",
+            500
+        )
 
 
 @owner_bp.route("/chat/<int:user_id>")
@@ -143,12 +165,12 @@ def user_chat(user_id):
     messages = sent + received
     messages.sort(key=lambda x: x.get("created_at", ""))
 
-    # نام کاربران را برای نمایش بهتر پیام‌ها اضافه می‌کنیم.
     user_ids = set()
 
     for message in messages:
         if message.get("sender_id"):
             user_ids.add(message["sender_id"])
+
         if message.get("receiver_id"):
             user_ids.add(message["receiver_id"])
 
