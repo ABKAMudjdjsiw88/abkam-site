@@ -594,3 +594,271 @@ grid-template-columns:repeat(2,1fr);
 }
 
 }
+cat >> static/css/style.css <<'EOF'
+
+/* =================================
+   ABKAM AUTH PAGE DESIGN
+   ================================= */
+
+body{
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+}
+
+/* قاب ورود و ثبت نام */
+
+.auth-card{
+    width:100%;
+    max-width:400px;
+    margin:55px auto 30px;
+
+    padding:30px 30px 26px;
+
+    background:rgba(7,43,88,.72);
+
+    border:1px solid rgba(42,174,255,.75);
+    border-radius:24px;
+
+    box-shadow:
+        0 0 20px rgba(0,150,255,.12),
+        0 20px 55px rgba(0,0,0,.40);
+
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+}
+
+/* عنوان */
+
+.auth-card h1{
+    margin:0 0 10px;
+
+    text-align:center;
+
+    color:#ffffff;
+
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+
+    font-size:27px;
+    font-weight:800;
+
+    line-height:1.7;
+}
+
+/* متن توضیح */
+
+.auth-card .muted{
+    margin:0 0 25px;
+
+    text-align:center;
+
+    color:#b9cce3;
+
+    font-size:13px;
+
+    line-height:1.8;
+}
+
+/* فرم */
+
+.auth-card form{
+    display:flex;
+    flex-direction:column;
+    gap:13px;
+}
+
+/* فیلدها */
+
+.auth-card input{
+    width:100%;
+    height:54px;
+
+    padding:0 17px;
+
+    background:rgba(5,35,75,.55);
+
+    border:1px solid rgba(54,166,255,.65);
+
+    border-radius:14px;
+
+    color:#ffffff;
+
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+
+    font-size:14px;
+
+    outline:none;
+
+    transition:.2s;
+}
+
+.auth-card input::placeholder{
+    color:#91a8c2;
+}
+
+.auth-card input:focus{
+    border-color:#28adff;
+
+    background:rgba(7,47,95,.75);
+
+    box-shadow:
+        0 0 0 3px rgba(40,173,255,.10),
+        0 0 18px rgba(40,173,255,.12);
+}
+
+/* دکمه اصلی */
+
+.auth-card button{
+    width:100%;
+    height:56px;
+
+    margin-top:4px;
+
+    border:0;
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #08a5ff 0%,
+            #0878ff 48%,
+            #245cff 100%
+        );
+
+    color:#ffffff;
+
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+
+    font-size:15px;
+    font-weight:700;
+
+    box-shadow:
+        0 8px 24px rgba(0,117,255,.30);
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.auth-card button:hover{
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 10px 30px rgba(0,140,255,.40);
+}
+
+.auth-card button:active{
+    transform:scale(.98);
+}
+
+/* ساخت حساب جدید */
+
+.auth-card .secondary{
+    width:100%;
+
+    height:52px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    margin-top:13px;
+
+    padding:0;
+
+    background:rgba(7,43,88,.40);
+
+    border:1px solid rgba(54,166,255,.65);
+
+    border-radius:14px;
+
+    color:#ffffff;
+
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+
+    font-size:14px;
+    font-weight:500;
+
+    transition:.2s;
+}
+
+.auth-card .secondary:hover{
+    background:rgba(11,65,125,.55);
+}
+
+/* متن پایین ثبت نام */
+
+.auth-card > p{
+    margin:20px 0 0;
+
+    text-align:center;
+
+    color:#c2d1e3;
+
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+
+    font-size:13px;
+
+    line-height:2;
+}
+
+/* لینک ورود */
+
+.auth-card > p a{
+    color:#29b0ff;
+
+    font-weight:700;
+}
+
+.auth-card > p a:hover{
+    color:#6acbff;
+}
+
+/* خطا */
+
+.auth-card .error{
+    margin-bottom:13px;
+
+    padding:11px;
+
+    background:rgba(120,25,40,.40);
+
+    border:1px solid rgba(255,90,110,.35);
+
+    border-radius:12px;
+
+    color:#ffd9de;
+
+    font-size:13px;
+
+    line-height:1.7;
+}
+
+/* موبایل */
+
+@media(max-width:480px){
+
+    .auth-card{
+        max-width:none;
+
+        margin:35px auto 20px;
+
+        padding:27px 20px 23px;
+
+        border-radius:22px;
+    }
+
+    .auth-card h1{
+        font-size:24px;
+    }
+
+    .auth-card input{
+        height:52px;
+    }
+
+    .auth-card button{
+        height:54px;
+    }
+}
+
+EOF
